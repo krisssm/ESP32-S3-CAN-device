@@ -1,10 +1,10 @@
-#include <mcp_can.h>
+#include <mcp_can.h> //Library used from https://github.com/coryjfowler/MCP_CAN_lib
 #include <SPI.h>
 #include <string.h>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include <TFT_eSPI.h>
+#include <TFT_eSPI.h> //Library used from https://github.com/Bodmer/TFT_eSPI
 
 
 
@@ -90,22 +90,43 @@ void printIntakePressure(float pressure) {  //Print coolant temp
   tft.drawCentreString("   " + String(pressure) + " " + "bar" + " ", centerX, centerY - 25, FONT_SIZE);
 }
 
-void printIntakeTemp(int temp) {  //Print intake temp
-  tft.setTextColor(TFT_BLACK, TFT_WHITE);
-  tft.drawCentreString("Sisselaske temp", centerX, centerY - 50, FONT_SIZE);
-  tft.drawCentreString("   " + String(temp) + " " + "`" + "C" + " ", centerX, centerY - 25, FONT_SIZE);
-  tft.drawCentreString("Seadista", centerX, centerY + 80, FONT_SIZE);
-}
-
 void printCoolantMessage() {
 
-  if (engineRpm >= maxRPM) {  //Check if the rpm is at the max, so the colors need to change, because the background is red
+  if (engineRpm >= maxRPM && screen == 1) {  //Check if the rpm is at the max, so the colors need to change, because the background is red
     tft.setTextColor(TFT_RED, TFT_WHITE);
     tft.drawCentreString("Kontrolli jahutusvedelikku!", centerX, centerY + 45, FONT_SIZE);
     tft.setTextColor(TFT_WHITE, TFT_RED);
   } else {
     tft.setTextColor(TFT_WHITE, TFT_RED);
     tft.drawCentreString("Kontrolli jahutusvedelikku!", centerX, centerY + 45, FONT_SIZE);
+    tft.setTextColor(TFT_BLACK, TFT_WHITE);
+  }
+}
+
+void printIntakeMessage() {
+
+  if (engineRpm >= maxRPM && screen == 1) {  //Check if the rpm is at the max, so the colors need to change, because the background is red
+    tft.setTextColor(TFT_RED, TFT_WHITE);
+    tft.drawCentreString("Kontrolli sisselaset!", centerX, centerY + 45, FONT_SIZE);
+    tft.setTextColor(TFT_WHITE, TFT_RED);
+  } else {
+    tft.setTextColor(TFT_WHITE, TFT_RED);
+    tft.drawCentreString("Kontrolli sisselaset!", centerX, centerY + 45, FONT_SIZE);
+    tft.setTextColor(TFT_BLACK, TFT_WHITE);
+  }
+}
+
+void printBothMessages() {
+  if (engineRpm >= maxRPM && screen == 1) {  //Check if the rpm is at the max, so the colors need to change, because the background is red
+    tft.setTextColor(TFT_RED, TFT_WHITE);
+    tft.drawCentreString("Kontrolli sisselaset!", centerX, centerY + 15, FONT_SIZE);
+    tft.drawCentreString("Kontrolli jahutusvedelikku!", centerX, centerY + 45, FONT_SIZE);
+    tft.setTextColor(TFT_WHITE, TFT_RED);
+  } else {
+    tft.setTextColor(TFT_WHITE, TFT_RED);
+    tft.drawCentreString("Kontrolli sisselaset!", centerX, centerY + 15, FONT_SIZE);
+    tft.drawCentreString("Kontrolli jahutusvedelikku!", centerX, centerY + 45, FONT_SIZE);
+
     tft.setTextColor(TFT_BLACK, TFT_WHITE);
   }
 }
@@ -332,9 +353,18 @@ void loop() {
       break;
   }
 
-  if (coolantTemp >= maxCoolantTemp) { //Check if coolant temp is over set max value
+  if (coolantTemp >= maxCoolantTemp && intakeTemp >= maxIntakeTemp) {
+    printBothMessages();
+  } else if (coolantTemp >= maxCoolantTemp) {
     printCoolantMessage();
-  } else if (intakeTemp >= maxIntakeTemp) { //Check if intake temp is over set max value
+  } else if (intakeTemp >= maxIntakeTemp) {
     printIntakeMessage();
+  }
+
+  if (lastCoolantTemp >= maxCoolantTemp && coolantTemp < maxCoolantTemp){
+    tft.fillScreen(TFT_WHITE);
+  }
+  if (lastIntakeTemp >= maxIntakeTemp && intakeTemp < maxIntakeTemp){
+    tft.fillScreen(TFT_WHITE);
   }
 }
